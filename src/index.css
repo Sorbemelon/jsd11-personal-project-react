@@ -1,0 +1,23 @@
+@import "tailwindcss";
+
+@layer base {
+  h1 {
+    @apply text-3xl md:text-7xl font-semibold;
+  }
+
+  h2 {
+    @apply text-2xl md:text-3xl font-semibold;
+  }
+
+  p {
+    @apply text-center px-2 text-sm md:text-base lg:text-xl;
+  }
+
+  textarea {
+    @apply bg-white text-black rounded px-2 py-1;
+  }
+  
+  body {
+    @apply min-h-screen bg-gray-900;
+  }
+}
