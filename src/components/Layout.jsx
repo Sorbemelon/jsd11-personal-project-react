@@ -7,7 +7,7 @@ export default function Layout() {
     return (
         <MessageProvider>
             <Navbar />
-            <div>
+            <div className="min-h-[calc(100dvh-64px)]">
                 <Outlet />
             </div>
         </MessageProvider>

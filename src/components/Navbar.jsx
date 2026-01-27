@@ -5,7 +5,7 @@ export default function Navbar() {
 
     return (
         <nav className="bg-linear-to-br from-black to-gray-800 text-white p-4 shadow-xl">
-            <ul className="flex justify-center gap-8 text-2xl *:whitespace-nowrap">
+            <ul className="flex justify-center gap-8 h-8 text-2xl *:whitespace-nowrap">
                 <li className="w-full justify-self-start text-start">
                     <div>
                         Logo
