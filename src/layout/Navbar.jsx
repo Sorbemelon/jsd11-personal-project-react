@@ -9,7 +9,7 @@ export default function Navbar() {
 
   return (
     <nav className="bg-linear-to-r from-black via-gray-800 via-60% to-[#CCFF00] text-white px-6 py-4 shadow-xl">
-      <div className="flex items-center justify-between mx-auto">
+      <div className="flex items-center justify-between mx-auto h-8">
         {/* Logo */}
         <Link
           to="/"
