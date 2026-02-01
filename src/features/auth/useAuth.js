@@ -1,15 +1,6 @@
-import { useEffect, useState } from "react";
+// src/features/auth/useAuth.js
+import { useAuthContext } from "./AuthContext";
 
 export default function useAuth() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-
-  useEffect(() => {
-    const auth = localStorage.getItem("auth");
-    setIsAuthenticated(auth === "true");
-  }, []);
-
-  return {
-    isAuthenticated,
-    setIsAuthenticated,
-  };
+  return useAuthContext();
 }

@@ -1,30 +1,51 @@
+// src/features/upload/useUpload.js
 import { useState } from "react";
+import api from "@/lib/api";
 
-export function useUpload() {
+export function useUpload({ parentId = null } = {}) {
   const [uploading, setUploading] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState([]);
 
   const uploadFile = async (file) => {
-    if (!file) return;
+    if (!file || uploading) return;
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    // 📁 target folder (null = root)
+    if (parentId) {
+      formData.append("parentId", parentId);
+    }
 
     setUploading(true);
 
     try {
-      // 🔁 Simulate transform → JSON
-      await new Promise((res) => setTimeout(res, 800));
+      const res = await api.post("/files/upload", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
 
-      const transformed = {
-        id: crypto.randomUUID(),
-        name: file.name,
-        size: file.size,
-        type: file.type,
-        chunks: Math.floor(Math.random() * 200) + 20,
-        updatedAt: new Date().toISOString()
-      };
+      /**
+       * Expected backend response shape (example):
+       * {
+       *   file: {
+       *     _id,
+       *     name,
+       *     size,
+       *     mimeType,
+       *     parentId,
+       *     createdAt,
+       *     updatedAt
+       *   }
+       * }
+       */
+      const uploaded = res.data.file;
 
-      setUploadedFiles((prev) => [...prev, transformed]);
+      // ➕ optimistic local state (for tables, previews, etc.)
+      setUploadedFiles((prev) => [...prev, uploaded]);
 
-      return transformed;
+      return uploaded;
     } finally {
       setUploading(false);
     }
@@ -33,6 +54,6 @@ export function useUpload() {
   return {
     uploading,
     uploadedFiles,
-    uploadFile
+    uploadFile,
   };
 }

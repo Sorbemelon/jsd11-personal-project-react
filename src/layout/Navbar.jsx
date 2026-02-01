@@ -1,4 +1,3 @@
-// src/components/layout/Navbar.jsx
 import { Link } from "react-router-dom";
 import useAuth from "@/features/auth/useAuth";
 import useLogout from "@/features/auth/useLogout";
@@ -31,12 +30,12 @@ export default function Navbar() {
             </>
           ) : (
             <>
-              <Link
-                to="/login"
+              {/* <Link
+                to="/"
                 className="px-4 py-1.5 rounded-full bg-black border border-white/20 hover:bg-white hover:text-black transition"
               >
                 Get Started
-              </Link>
+              </Link> */}
             </>
           )}
         </div>

@@ -7,20 +7,30 @@ import {
 } from "@/components/ui/breadcrumb";
 import { ChevronRight } from "lucide-react";
 
-export default function BreadcrumbPath({ activePath }) {
+export default function BreadcrumbPath({ activePath = [] }) {
+  if (!Array.isArray(activePath) || activePath.length === 0) {
+    return null;
+  }
+
   return (
     <Breadcrumb className="mb-4">
       <BreadcrumbList>
-        {activePath.map((node, idx) => (
-          <BreadcrumbItem key={node.id}>
-            <BreadcrumbLink href="#">{node.name}</BreadcrumbLink>
-            {idx < activePath.length - 1 && (
-              <BreadcrumbSeparator>
-                <ChevronRight size={14} />
-              </BreadcrumbSeparator>
-            )}
-          </BreadcrumbItem>
-        ))}
+        <p className="text-sm font-semibold pr-0">Current Folder:</p>
+        {activePath
+          .filter(Boolean) // 👈 IMPORTANT
+          .map((node, idx, arr) => (
+            <BreadcrumbItem key={node._id}>
+              <BreadcrumbLink href="#">
+                {node.name ?? "Unnamed"}
+              </BreadcrumbLink>
+
+              {idx < arr.length - 1 && (
+                <BreadcrumbSeparator>
+                  <ChevronRight size={14} />
+                </BreadcrumbSeparator>
+              )}
+            </BreadcrumbItem>
+          ))}
       </BreadcrumbList>
     </Breadcrumb>
   );

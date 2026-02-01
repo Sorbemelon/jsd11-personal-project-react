@@ -1,10 +1,18 @@
+// UploadCard.jsx
 import { Upload } from "lucide-react";
 import { useRef } from "react";
 import { useUpload } from "./useUpload";
+import BreadcrumbPath from "@/features/fileManager/components/BreadcrumbPath";
 
-export default function UploadCard() {
+export default function UploadCard({ activePath }) {
   const inputRef = useRef(null);
-  const { uploadFile, uploading } = useUpload();
+
+  // 🎯 current folder
+  const targetFolderId = activePath?.at(-1)?.id ?? null;
+
+  const { uploadFile, uploading } = useUpload({
+    parentId: targetFolderId,
+  });
 
   const handleFileChange = async (e) => {
     const file = e.target.files?.[0];
@@ -19,9 +27,11 @@ export default function UploadCard() {
       <h2 className="text-lg font-semibold mb-2 flex items-center gap-2">
         <Upload size={18} /> Upload & Transform
       </h2>
+      
+       <BreadcrumbPath activePath={activePath} />
 
       <p className="text-sm text-slate-500 mb-4">
-        Upload files and transform them into structured JSON stored in MongoDB.
+        Upload files to the current folder.
       </p>
 
       <div
@@ -32,7 +42,7 @@ export default function UploadCard() {
       >
         <Upload className="mx-auto mb-2 text-slate-400" />
         <p className="text-sm text-slate-600">
-          {uploading ? "Uploading..." : "Click or drag file to upload"}
+          {uploading ? "Uploading..." : "Click to upload file"}
         </p>
       </div>
 

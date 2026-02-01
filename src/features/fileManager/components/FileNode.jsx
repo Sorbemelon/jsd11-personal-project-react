@@ -1,3 +1,4 @@
+// src/features/fileManager/components/FileNode.jsx
 import { useState } from "react";
 import { Folder, FileText, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -6,32 +7,43 @@ import NewFolderInput from "./NewFolderInput";
 
 export default function FileNode({
   node,
-  level,
+  level = 0,
+  parentPath = [],
   selected,
   toggleSelect,
   setActivePath,
-  parentPath,
-  addFolder,
-  deleteNode
+  createFolder,
+  deleteNode,
 }) {
+  if (!node || !node.name) return null;
+
   const [open, setOpen] = useState(true);
   const [adding, setAdding] = useState(false);
 
   const isFolder = node.type === "folder";
   const currentPath = [...parentPath, node];
 
+  const isSelected =
+    selected instanceof Set && selected.has(node._id);
+
+  // ✅ ROOT DETECTION
+  const isRoot = level === 0 || parentPath.length === 0;
+
   return (
-    <div style={{ paddingLeft: level * 12 }}>
-      <div className="flex items-center gap-1 py-0.5 group">
+    <li>
+      <div
+        className="flex items-center gap-1 py-0.5 group"
+        style={{ paddingLeft: level * 12 }}
+      >
         <Checkbox
-          checked={selected.has(node.id)}
+          checked={isSelected}
           onCheckedChange={() => toggleSelect(node)}
         />
 
         {isFolder && (
           <button
             onClick={() => setOpen((o) => !o)}
-            className="h-4 w-4 text-xs"
+            className="h-4 w-4 text-base mb-2"
           >
             {open ? "▾" : "▸"}
           </button>
@@ -40,12 +52,13 @@ export default function FileNode({
         {isFolder ? <Folder size={14} /> : <FileText size={14} />}
 
         <span
-          className="cursor-pointer text-sm flex-1"
+          className="cursor-pointer text-sm flex-1 truncate"
           onClick={() => setActivePath(currentPath)}
         >
           {node.name}
         </span>
 
+        {/* ➕ Add folder (allowed for root) */}
         {isFolder && (
           <Button
             variant="ghost"
@@ -57,7 +70,8 @@ export default function FileNode({
           </Button>
         )}
 
-        {node.id !== "root" && (
+        {/* 🗑️ Delete (DISABLED for root) */}
+        {!isRoot && (
           <Button
             variant="ghost"
             size="icon"
@@ -71,8 +85,11 @@ export default function FileNode({
 
       {adding && (
         <NewFolderInput
-          onConfirm={(name) => {
-            addFolder(node.id, name);
+          onConfirm={async (name) => {
+            await createFolder({
+              name,
+              parentId: node._id,
+            });
             setAdding(false);
             setOpen(true);
           }}
@@ -80,21 +97,23 @@ export default function FileNode({
         />
       )}
 
-      {isFolder &&
-        open &&
-        node.children?.map((child) => (
-          <FileNode
-            key={child.id}
-            node={child}
-            level={level + 1}
-            selected={selected}
-            toggleSelect={toggleSelect}
-            setActivePath={setActivePath}
-            parentPath={currentPath}
-            addFolder={addFolder}
-            deleteNode={deleteNode}
-          />
-        ))}
-    </div>
+      {isFolder && open && node.children?.length > 0 && (
+        <ul>
+          {node.children.map((child) => (
+            <FileNode
+              key={child._id}
+              node={child}
+              level={level + 1}
+              parentPath={currentPath}
+              selected={selected}
+              toggleSelect={toggleSelect}
+              setActivePath={setActivePath}
+              createFolder={createFolder}
+              deleteNode={deleteNode}
+            />
+          ))}
+        </ul>
+      )}
+    </li>
   );
 }

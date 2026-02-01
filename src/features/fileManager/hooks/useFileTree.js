@@ -1,41 +1,95 @@
-import { useState } from "react";
-import { removeNodeById } from "../utils/treeHelpers";
+// src/features/fileManager/hooks/useFileTree.js
+import { useCallback, useEffect, useState } from "react";
+import api from "@/lib/api";
 
-export default function useFileTree(initialTree) {
-  const [fileTree, setFileTree] = useState(initialTree);
+/* ======================================================
+   NORMALIZER (CRITICAL)
+====================================================== */
+const normalizeNode = (node) => ({
+  _id: node._id,
+  name: node.name,
+  type: node.type,
+  children: Array.isArray(node.children)
+    ? node.children.map(normalizeNode)
+    : [],
+});
 
-  const addFolder = (parentId, folderName) => {
-    if (!folderName) return;
+export default function useFileTree({ rootFolderId = null } = {}) {
+  const [fileTree, setFileTree] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-    const insert = (nodes) =>
-      nodes.map((n) =>
-        n.id === parentId
-          ? {
-              ...n,
-              children: [
-                ...(n.children || []),
-                {
-                  id: crypto.randomUUID(),
-                  name: folderName,
-                  type: "folder",
-                  children: []
-                }
-              ]
-            }
-          : { ...n, children: n.children ? insert(n.children) : undefined }
-      );
+  /* ======================================================
+     FETCH TREE
+  ====================================================== */
+  const fetchTree = useCallback(async () => {
+    setLoading(true);
+    setError(null);
 
-    setFileTree((prev) => insert(prev));
+    try {
+      const res = await api.get("/folders/tree");
+
+      // Backend already returns a root node
+      const normalizedRoot = normalizeNode(res.data.data);
+
+      // 👇 KEEP ROOT (do NOT wrap again)
+      setFileTree([normalizedRoot]);
+    } catch (err) {
+      console.error("Failed to fetch file tree:", err);
+      setError("Failed to load file tree");
+      setFileTree([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchTree();
+    console.log(fileTree);
+  }, [fetchTree]);
+
+  /* ======================================================
+     MUTATIONS
+  ====================================================== */
+
+  const createFolder = async ({ name, parentId = null }) => {
+    if (!name?.trim()) return;
+
+    await api.post("/folders", { name, parentId });
+    await fetchTree();
   };
 
-  const deleteNode = (nodeId) => {
-    setFileTree((prev) => removeNodeById(prev, nodeId));
+  const deleteNode = async (id, type) => {
+    if (!id) return;
+
+    if (type === "folder") {
+      await api.delete(`/folders/${id}`);
+    } else {
+      await api.delete(`/files/${id}`);
+    }
+
+    await fetchTree();
+  };
+
+  const moveNode = async ({ id, type, targetParentId }) => {
+    if (!id) return;
+
+    const url =
+      type === "folder"
+        ? `/folders/${id}/move`
+        : `/files/${id}/move`;
+
+    await api.patch(url, { targetParentId });
+    await fetchTree();
   };
 
   return {
     fileTree,
-    addFolder,
+    loading,
+    error,
+    fetchTree,
+    createFolder,
     deleteNode,
-    setFileTree
+    moveNode,
   };
 }

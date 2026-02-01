@@ -1,3 +1,4 @@
+// src/pages/Dashboard.jsx
 import { useState } from "react";
 import FileTree from "@/features/fileManager/components/FileTree";
 import BreadcrumbPath from "@/features/fileManager/components/BreadcrumbPath";
@@ -6,109 +7,168 @@ import ChatPanel from "@/features/chat/components/ChatPanel";
 import StoredRecordsTable from "@/features/dataViewer/StoredRecordsTable";
 import { Button } from "@/components/ui/button";
 import { PanelLeft, Sparkles, Folder } from "lucide-react";
+
 import {
   useFileTree,
   useSelection,
   useBreadcrumb
 } from "@/features/fileManager";
 
-// Mock initailFileTree
-const initialFileTree = [
-  {
-    id: "root",
-    name: "Home",
-    type: "folder",
-    children: [
-      {
-        id: "reports",
-        name: "Reports",
-        type: "folder",
-        children: [
-          {
-            id: "2025",
-            name: "2025",
-            type: "folder",
-            children: [
-              { id: "doc1", name: "report-2025.pdf", type: "file" },
-              { id: "doc2", name: "summary.json", type: "file" }
-            ]
-          }
-        ]
-      }
-    ]
-  }
-];
-
-
-
 export default function Dashboard() {
-  const { fileTree, addFolder, deleteNode } = useFileTree(initialFileTree);
-  const { selectedNodes, toggleSelect, removeSelection } = useSelection();
-  const { activePath, setActivePath } = useBreadcrumb(initialFileTree[0]);
+  /* ======================================================
+     FILE TREE (API)
+  ====================================================== */
+  const {
+    fileTree,
+    loading: treeLoading,
+    createFolder,
+    deleteNode,
+    fetchTree
+  } = useFileTree();
+
+  const {
+    selectedNodes,
+    toggleSelect,
+    removeSelection
+  } = useSelection();
+
+  const {
+    activePath = [],
+    setActivePath,
+    activeFolder
+  } = useBreadcrumb();
+
+  /* ======================================================
+     UI STATE
+  ====================================================== */
+  const [showSidebar, setShowSidebar] = useState(true);
+  const [showAI, setShowAI] = useState(true);
+
+  /* ======================================================
+     CHAT (mock)
+  ====================================================== */
   const [prompt, setPrompt] = useState("");
   const [messages, setMessages] = useState([
     { role: "ai", content: "Ask me anything about your selected documents." }
   ]);
 
-  const [showSidebar, setShowSidebar] = useState(true);
-  const [showAI, setShowAI] = useState(true);
+  /* ======================================================
+     HANDLERS
+  ====================================================== */
+  const handleDelete = async (node) => {
+    if (!node) return;
 
-  const handleDelete = (node) => {
-    deleteNode(node.id);   // remove from tree
-    removeSelection(node); // clean selection state
+    const label = node.type === "folder" ? "folder" : "file";
+
+    const confirmed = window.confirm(
+      `Are you sure you want to delete this ${label}?\n\n"${node.name}"\n\nThis action cannot be undone.`
+    );
+
+    if (!confirmed) return;
+
+    await deleteNode(node._id, node.type);
+    removeSelection(node);
   };
 
   return (
     <div className="flex min-h-[calc(100dvh-64px)] bg-slate-100">
+      {/* ==================================================
+         SIDEBAR
+      ================================================== */}
       {showSidebar && (
         <aside className="w-64 bg-white border-r p-4">
-          
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2 font-medium text-indigo-600">
               <Folder size={16} /> Files
             </div>
-            <Button variant="ghost" size="icon" onClick={() => setShowSidebar(false)}>
+
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setShowSidebar(false)}
+            >
               <PanelLeft size={18} />
             </Button>
           </div>
 
-          <FileTree
-            fileTree={fileTree}
-            selected={selectedNodes}
-            toggleSelect={toggleSelect}
-            setActivePath={setActivePath}
-            addFolder={addFolder}
-            deleteNode={handleDelete}
-          />
+          {treeLoading ? (
+            <p className="text-sm text-slate-500">
+              Loading folders…
+            </p>
+          ) : (
+            <FileTree
+              fileTree={fileTree}
+              selected={selectedNodes}
+              toggleSelect={toggleSelect}
+              setActivePath={setActivePath}
+              createFolder={createFolder}
+              deleteNode={handleDelete}
+            />
+          )}
         </aside>
       )}
 
+      {/* ==================================================
+         MAIN
+      ================================================== */}
       <main className="flex-1 p-6">
         <div className="flex justify-between">
           {!showSidebar && (
-            <Button variant="outline" size="sm" onClick={() => setShowSidebar(true)} className="mb-4">
-              <PanelLeft size={16} className="mr-2" /> Show Sidebar
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowSidebar(true)}
+              className="mb-4"
+            >
+              <PanelLeft size={16} className="mr-2" />
+              Show Sidebar
             </Button>
           )}
 
           {!showAI && (
-            <Button variant="outline" size="sm" className="mb-4 ml-auto" onClick={() => setShowAI(true)}>
-              <Sparkles size={16} className="mr-2" /> Show AI Assistant
+            <Button
+              variant="outline"
+              size="sm"
+              className="mb-4 ml-auto"
+              onClick={() => setShowAI(true)}
+            >
+              <Sparkles size={16} className="mr-2" />
+              Show AI Assistant
             </Button>
           )}
         </div>
 
-        <BreadcrumbPath activePath={activePath} />
-        <UploadCard />
+        {/* ===== Breadcrumb ===== */}
+        {/* <BreadcrumbPath activePath={activePath} /> */}
+
+        {/* ===== Upload ===== */}
+        <UploadCard
+          targetFolder={activeFolder ?? null}
+          onUploaded={fetchTree}
+          activePath={activePath}
+        />
+
+        {/* ===== Data Viewer ===== */}
         <StoredRecordsTable />
       </main>
 
+      {/* ==================================================
+         AI PANEL
+      ================================================== */}
       {showAI && (
         <ChatPanel
           messages={messages}
           prompt={prompt}
           setPrompt={setPrompt}
-          onSend={() => setMessages([...messages, { role: "user", content: prompt }])}
+          onSend={() => {
+            if (!prompt.trim()) return;
+
+            setMessages((prev) => [
+              ...prev,
+              { role: "user", content: prompt }
+            ]);
+            setPrompt("");
+          }}
           onClose={() => setShowAI(false)}
         />
       )}

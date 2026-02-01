@@ -1,8 +1,11 @@
 import { createBrowserRouter } from "react-router-dom";
 
 import Layout from "@/layout/Layout";
-import Login from "@/pages/LoginPage";
+import Home from "@/pages/Home";
 import Dashboard from "@/pages/Dashboard";
+import LoginPage from "@/pages/Login/LoginForm";
+
+import RequireAuth from "@/features/auth/RequireAuth";
 
 const router = createBrowserRouter([
   {
@@ -16,11 +19,21 @@ const router = createBrowserRouter([
       </div>
     ),
     children: [
-      { index: true, element: <Login /> },      // "/"
-      { path: "login", element: <Login /> },     // "/user"
-      { path: "dashboard", element: <Dashboard /> } // "/dashboard"
-    ]
-  }
+      // 🌍 Public routes
+      { index: true, element: <Home /> },        // "/"
+      { path: "home", element: <Home /> },       // "/home"
+
+      // 🔐 Protected routes
+      {
+        path: "dashboard",
+        element: (
+          <RequireAuth>
+            <Dashboard />
+          </RequireAuth>
+        ),
+      },
+    ],
+  },
 ]);
 
 export default router;
