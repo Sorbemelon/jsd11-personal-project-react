@@ -1,8 +1,10 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:3000/api/v1",
-  withCredentials: true, // REQUIRED for refresh token cookie
+  baseURL:
+    import.meta.env.VITE_API_BASE_URL ||
+    "http://localhost:3000/api/v1",
+  withCredentials: true, // 🔑 required for refresh cookie
 });
 
 /* ======================================================
@@ -17,37 +19,46 @@ api.interceptors.request.use((config) => {
 });
 
 /* ======================================================
-   RESPONSE: Auto refresh on 401 (SAFE)
+   RESPONSE: Auto refresh on 401
 ====================================================== */
 api.interceptors.response.use(
   (res) => res,
   async (err) => {
     const originalRequest = err.config;
 
-    const isAuthEndpoint =
-      originalRequest?.url?.includes("/auth/login") ||
-      originalRequest?.url?.includes("/auth/register") ||
-      originalRequest?.url?.includes("/auth/refresh") ||
-      originalRequest?.url?.includes("/auth/logout");
+    if (!originalRequest || originalRequest._retry) {
+      return Promise.reject(err);
+    }
 
-    // 🔒 Only refresh for protected APIs
-    if (
-      err.response?.status === 401 &&
-      !originalRequest._retry &&
-      !isAuthEndpoint
-    ) {
+    const isAuthEndpoint = [
+      "/auth/login",
+      "/auth/register",
+      "/auth/refresh",
+      "/auth/logout",
+    ].some((path) => originalRequest.url?.includes(path));
+
+    if (err.response?.status === 401 && !isAuthEndpoint) {
       originalRequest._retry = true;
 
       try {
-        const { data } = await api.post("/auth/refresh");
+        // 🔁 refreshToken is sent automatically via cookie
+        const refreshRes = await api.post("/auth/refresh");
 
-        localStorage.setItem("accessToken", data.accessToken);
+        const newAccessToken =
+          refreshRes.data?.accessToken ||
+          refreshRes.headers?.["x-access-token"];
+
+        if (!newAccessToken) {
+          throw new Error("No access token returned");
+        }
+
+        localStorage.setItem("accessToken", newAccessToken);
         originalRequest.headers.Authorization =
-          `Bearer ${data.accessToken}`;
+          `Bearer ${newAccessToken}`;
 
         return api(originalRequest);
       } catch {
-        // refresh failed → force logout
+        // ❌ refresh failed → force logout
         localStorage.removeItem("accessToken");
         window.location.href = "/";
       }
