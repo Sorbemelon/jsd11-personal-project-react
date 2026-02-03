@@ -76,10 +76,10 @@ export default function Dashboard() {
          SIDEBAR
       ================================================== */}
       {showSidebar && (
-        <aside className="w-64 bg-white border-r p-4">
+        <aside className="w-fit max-w-90 bg-white border-r p-4">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2 font-medium text-indigo-600">
-              <Folder size={16} /> Files
+              <Folder size={16} /> Select & Ask AI
             </div>
 
             <Button
@@ -142,20 +142,18 @@ export default function Dashboard() {
         {/* <BreadcrumbPath activePath={activePath} /> */}
 
         {/* ===== Upload ===== */}
-        <UploadCard
-          targetFolder={activeFolder ?? null}
-          onUploaded={fetchTree}
-          activePath={activePath}
-        />
+        {showAI && (
+          <UploadCard
+            targetFolder={activeFolder ?? null}
+            onUploaded={fetchTree}
+            activePath={activePath}
+            onClose={() => setShowAI(false)}
+          />
+        )}
 
         {/* ===== Data Viewer ===== */}
-        <StoredRecordsTable />
-      </main>
+        {/* <StoredRecordsTable /> */}
 
-      {/* ==================================================
-         AI PANEL
-      ================================================== */}
-      {showAI && (
         <ChatPanel
           messages={messages}
           prompt={prompt}
@@ -171,7 +169,28 @@ export default function Dashboard() {
           }}
           onClose={() => setShowAI(false)}
         />
-      )}
+      </main>
+
+      {/* ==================================================
+         AI PANEL
+      ================================================== */}
+      {/* {showAI && (
+        <ChatPanel
+          messages={messages}
+          prompt={prompt}
+          setPrompt={setPrompt}
+          onSend={() => {
+            if (!prompt.trim()) return;
+
+            setMessages((prev) => [
+              ...prev,
+              { role: "user", content: prompt }
+            ]);
+            setPrompt("");
+          }}
+          onClose={() => setShowAI(false)}
+        />
+      )} */}
     </div>
   );
 }

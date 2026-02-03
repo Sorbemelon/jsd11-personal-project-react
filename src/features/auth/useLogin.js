@@ -5,7 +5,7 @@ import useAuth from "./useAuth";
 
 export default function useLogin() {
   const navigate = useNavigate();
-  const { setIsAuthenticated, setUser } = useAuth();
+  const { refreshAuth } = useAuth(); // ✅ use single source of truth
 
   const [form, setForm] = useState({
     email: "",
@@ -18,6 +18,7 @@ export default function useLogin() {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
+
     setForm((prev) => ({
       ...prev,
       [name]: type === "checkbox" ? checked : value,
@@ -26,30 +27,24 @@ export default function useLogin() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // 🚫 prevent spam submit
     if (loading) return;
 
     setLoading(true);
     setError(null);
 
     try {
-      const res = await api.post("/auth/login", {
+      // 1️⃣ Login → sets cookies
+      await api.post("/auth/login", {
         email: form.email,
         password: form.password,
         remember: form.remember,
       });
 
-      const { accessToken, user } = res.data;
+      // 2️⃣ Rehydrate auth context
+      await refreshAuth();
 
-      // 🔐 short-lived token
-      localStorage.setItem("accessToken", accessToken);
-
-      // refreshToken is HttpOnly cookie
-      setIsAuthenticated(true);
-      setUser(user);
-
-      navigate("/dashboard");
+      // 3️⃣ Redirect
+      navigate("/dashboard", { replace: true });
     } catch (err) {
       if (err.response?.status === 429) {
         setError(

@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import api from "@/lib/api";
 
 const AuthContext = createContext(null);
@@ -8,31 +8,36 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const initializedRef = useRef(false);
+
+  const refreshAuth = async () => {
+    setLoading(true);
+
+    try {
+      const res = await api.get("/auth/me");
+      const user = res.data?.user ?? null;
+
+      setUser(user);
+      setIsAuthenticated(Boolean(user));
+    } catch {
+      setUser(null);
+      setIsAuthenticated(false);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const initAuth = async () => {
-      const accessToken = localStorage.getItem("accessToken");
+    if (initializedRef.current) return;
+    initializedRef.current = true;
 
-      if (!accessToken) {
-        setIsAuthenticated(false);
-        setLoading(false);
-        return;
-      }
-
-      try {
-        const res = await api.get("/auth/me");
-        setUser(res.data.user);
-        setIsAuthenticated(true);
-      } catch {
-        localStorage.removeItem("accessToken");
-        setIsAuthenticated(false);
-        setUser(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    initAuth();
+    refreshAuth();
   }, []);
+
+  const clearAuth = async () => {
+    setUser(null);
+    setIsAuthenticated(false);
+  };
 
   return (
     <AuthContext.Provider
@@ -40,8 +45,8 @@ export function AuthProvider({ children }) {
         isAuthenticated,
         user,
         loading,
-        setIsAuthenticated,
-        setUser,
+        refreshAuth, // ✅ EXPOSE THIS
+        clearAuth,
       }}
     >
       {children}
@@ -52,7 +57,7 @@ export function AuthProvider({ children }) {
 export function useAuthContext() {
   const ctx = useContext(AuthContext);
   if (!ctx) {
-    throw new Error("useAuth must be used inside AuthProvider");
+    throw new Error("useAuthContext must be used inside AuthProvider");
   }
   return ctx;
 }

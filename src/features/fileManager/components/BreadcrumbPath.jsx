@@ -6,15 +6,20 @@ import {
   BreadcrumbSeparator
 } from "@/components/ui/breadcrumb";
 import { ChevronRight } from "lucide-react";
+import { useEffect } from "react";
 
 export default function BreadcrumbPath({ activePath = [] }) {
   if (!Array.isArray(activePath) || activePath.length === 0) {
     return null;
   }
+  
+  // useEffect(() => {
+  //   console.log(activePath);
+  // }, []);
 
   return (
     <Breadcrumb className="mb-4">
-      <BreadcrumbList>
+      <BreadcrumbList className={`text-black`}>
         <p className="text-sm font-semibold pr-0">Current Folder:</p>
         {activePath
           .filter(Boolean) // 👈 IMPORTANT

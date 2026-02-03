@@ -6,7 +6,7 @@ export default function ChatMessage({ role, content }) {
   return (
     <div
       className={clsx(
-        "text-sm p-3 rounded-xl max-w-[85%]",
+        "text-sm p-3 rounded-xl max-w-[85%] w-fit",
         isUser
           ? "bg-indigo-600 text-white ml-auto"
           : "bg-slate-100 text-slate-700"

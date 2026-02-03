@@ -1,17 +1,20 @@
-// UploadCard.jsx
-import { Upload } from "lucide-react";
-import { useRef } from "react";
+// src/features/upload/UploadCard.jsx
+import { Upload, PanelRight } from "lucide-react";
+import { useRef, useEffect } from "react";
 import { useUpload } from "./useUpload";
 import BreadcrumbPath from "@/features/fileManager/components/BreadcrumbPath";
+import { Button } from "@/components/ui/button";
 
-export default function UploadCard({ activePath }) {
+export default function UploadCard({ activePath = [], onClose }) {
   const inputRef = useRef(null);
 
-  // 🎯 current folder
-  const targetFolderId = activePath?.at(-1)?.id ?? null;
+  // 🎯 current folder chunk
+  const currentFolder = activePath.at(-1) ?? null;
+
+  const parentId = currentFolder?._id ?? null;
 
   const { uploadFile, uploading } = useUpload({
-    parentId: targetFolderId,
+    parentId,
   });
 
   const handleFileChange = async (e) => {
@@ -22,27 +25,40 @@ export default function UploadCard({ activePath }) {
     e.target.value = "";
   };
 
-  return (
-    <div className="bg-white rounded-2xl shadow p-6 mb-6">
-      <h2 className="text-lg font-semibold mb-2 flex items-center gap-2">
-        <Upload size={18} /> Upload & Transform
-      </h2>
-      
-       <BreadcrumbPath activePath={activePath} />
+  // useEffect(() => {
+  //   console.log("active path:", activePath);
+  //   console.log("current folder:", currentFolder);
+  // }, [currentFolder]);
 
-      <p className="text-sm text-slate-500 mb-4">
-        Upload files to the current folder.
-      </p>
+  return (
+    <div className="bg-white rounded-2xl shadow p-6 pt-2 mb-6">
+      <div className="flex justify-between items-center">
+
+        <h2 className="text-lg font-semibold flex items-center gap-2">
+          <Upload size={18} /> Upload & Transform
+        </h2>
+
+        <Button variant="ghost" size="icon" onClick={onClose}>
+          <PanelRight size={18} />
+        </Button>
+
+      </div>
+
+      <BreadcrumbPath activePath={activePath} />
 
       <div
         onClick={() => inputRef.current?.click()}
-        className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition
-          ${uploading ? "opacity-50 pointer-events-none" : "hover:border-indigo-400"}
+        className={`border-2 border-dashed rounded-xl p-4 text-center cursor-pointer transition flex items-center justify-center
+          ${
+            uploading
+              ? "opacity-50 pointer-events-none"
+              : "hover:border-indigo-400"
+          }
         `}
       >
-        <Upload className="mx-auto mb-2 text-slate-400" />
+        <Upload className="text-slate-400" />
         <p className="text-sm text-slate-600">
-          {uploading ? "Uploading..." : "Click to upload file"}
+          {uploading ? "Uploading..." : "Click here to upload file to the current folder"}
         </p>
       </div>
 

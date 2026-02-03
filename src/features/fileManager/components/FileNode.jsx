@@ -1,5 +1,4 @@
-// src/features/fileManager/components/FileNode.jsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Folder, FileText, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -12,6 +11,7 @@ export default function FileNode({
   selected,
   toggleSelect,
   setActivePath,
+  activePath,          // 👈 pass this in
   createFolder,
   deleteNode,
 }) {
@@ -26,8 +26,23 @@ export default function FileNode({
   const isSelected =
     selected instanceof Set && selected.has(node._id);
 
-  // ✅ ROOT DETECTION
-  const isRoot = level === 0 || parentPath.length === 0;
+  const isRoot = level === 0;
+
+  // ✅ Set default activePath to first node (root only)
+  useEffect(() => {
+    if (isRoot && (!activePath || activePath.length === 0)) {
+      setActivePath([node]);
+    }
+  }, []);
+
+  const handleClick = () => {
+    if (isFolder) {
+      setActivePath(currentPath);
+    } else {
+      // file → set parent folder
+      setActivePath(parentPath);
+    }
+  };
 
   return (
     <li>
@@ -53,12 +68,11 @@ export default function FileNode({
 
         <span
           className="cursor-pointer text-sm flex-1 truncate"
-          onClick={() => setActivePath(currentPath)}
+          onClick={handleClick}
         >
           {node.name}
         </span>
 
-        {/* ➕ Add folder (allowed for root) */}
         {isFolder && (
           <Button
             variant="ghost"
@@ -70,7 +84,6 @@ export default function FileNode({
           </Button>
         )}
 
-        {/* 🗑️ Delete (DISABLED for root) */}
         {!isRoot && (
           <Button
             variant="ghost"
@@ -108,6 +121,7 @@ export default function FileNode({
               selected={selected}
               toggleSelect={toggleSelect}
               setActivePath={setActivePath}
+              activePath={activePath}   // 👈 forward it
               createFolder={createFolder}
               deleteNode={deleteNode}
             />

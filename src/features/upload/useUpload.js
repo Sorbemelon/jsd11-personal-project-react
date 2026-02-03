@@ -2,7 +2,9 @@
 import { useState } from "react";
 import api from "@/lib/api";
 
-export function useUpload({ parentId = null } = {}) {
+export function useUpload({
+  parentId = null,
+} = {}) {
   const [uploading, setUploading] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState([]);
 
@@ -12,7 +14,6 @@ export function useUpload({ parentId = null } = {}) {
     const formData = new FormData();
     formData.append("file", file);
 
-    // 📁 target folder (null = root)
     if (parentId) {
       formData.append("parentId", parentId);
     }
@@ -20,31 +21,10 @@ export function useUpload({ parentId = null } = {}) {
     setUploading(true);
 
     try {
-      const res = await api.post("/files/upload", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      const res = await api.post("/files/upload", formData);
+      const uploaded = res.data.data;
 
-      /**
-       * Expected backend response shape (example):
-       * {
-       *   file: {
-       *     _id,
-       *     name,
-       *     size,
-       *     mimeType,
-       *     parentId,
-       *     createdAt,
-       *     updatedAt
-       *   }
-       * }
-       */
-      const uploaded = res.data.file;
-
-      // ➕ optimistic local state (for tables, previews, etc.)
       setUploadedFiles((prev) => [...prev, uploaded]);
-
       return uploaded;
     } finally {
       setUploading(false);

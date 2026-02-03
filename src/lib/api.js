@@ -4,23 +4,22 @@ const api = axios.create({
   baseURL:
     import.meta.env.VITE_API_BASE_URL ||
     "http://localhost:3000/api/v1",
-  withCredentials: true, // 🔑 required for refresh cookie
+  withCredentials: true, // 🔑 cookie-based auth
 });
 
 /* ======================================================
-   REQUEST: Attach access token
+   RESPONSE: Auto refresh on 401 (SAFE & LOOP-PROOF)
 ====================================================== */
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("accessToken");
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
+let isRefreshing = false;
+let refreshQueue = [];
 
-/* ======================================================
-   RESPONSE: Auto refresh on 401
-====================================================== */
+const processQueue = (error) => {
+  refreshQueue.forEach((p) => {
+    error ? p.reject(error) : p.resolve();
+  });
+  refreshQueue = [];
+};
+
 api.interceptors.response.use(
   (res) => res,
   async (err) => {
@@ -30,41 +29,49 @@ api.interceptors.response.use(
       return Promise.reject(err);
     }
 
-    const isAuthEndpoint = [
+    const NO_REFRESH_ENDPOINTS = [
       "/auth/login",
       "/auth/register",
-      "/auth/refresh",
       "/auth/logout",
-    ].some((path) => originalRequest.url?.includes(path));
+      "/auth/refresh",
+      "/auth/me", // 🚫 auth bootstrap must NOT refresh
+    ];
 
-    if (err.response?.status === 401 && !isAuthEndpoint) {
-      originalRequest._retry = true;
+    const shouldSkipRefresh =
+      err.response?.status !== 401 ||
+      NO_REFRESH_ENDPOINTS.some((path) =>
+        originalRequest.url?.includes(path)
+      );
 
-      try {
-        // 🔁 refreshToken is sent automatically via cookie
-        const refreshRes = await api.post("/auth/refresh");
-
-        const newAccessToken =
-          refreshRes.data?.accessToken ||
-          refreshRes.headers?.["x-access-token"];
-
-        if (!newAccessToken) {
-          throw new Error("No access token returned");
-        }
-
-        localStorage.setItem("accessToken", newAccessToken);
-        originalRequest.headers.Authorization =
-          `Bearer ${newAccessToken}`;
-
-        return api(originalRequest);
-      } catch {
-        // ❌ refresh failed → force logout
-        localStorage.removeItem("accessToken");
-        window.location.href = "/";
-      }
+    if (shouldSkipRefresh) {
+      return Promise.reject(err);
     }
 
-    return Promise.reject(err);
+    originalRequest._retry = true;
+
+    // 🔒 Queue while refresh is running
+    if (isRefreshing) {
+      return new Promise((resolve, reject) => {
+        refreshQueue.push({ resolve, reject });
+      }).then(() => api(originalRequest));
+    }
+
+    isRefreshing = true;
+
+    try {
+      await api.post("/auth/refresh");
+
+      processQueue(null);
+      return api(originalRequest);
+    } catch (refreshErr) {
+      // ❌ Refresh failed = unauthenticated
+      processQueue(refreshErr);
+
+      // 🚫 DO NOT redirect / reload here
+      return Promise.reject(refreshErr);
+    } finally {
+      isRefreshing = false;
+    }
   }
 );
 

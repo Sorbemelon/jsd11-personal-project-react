@@ -35,7 +35,10 @@ export default function LoginForm({ onSwitch }) {
               onChange={handleChange}
               placeholder="you@example.com"
               required
-              className="w-full pl-10 pr-3 py-2 border rounded-xl text-sm focus:outline-none focus:ring focus:ring-[#CCFF00]/40"
+              disabled={loading}
+              className="w-full pl-10 pr-3 py-2 border rounded-xl text-sm
+                         focus:outline-none focus:ring focus:ring-[#CCFF00]/40
+                         disabled:opacity-60"
             />
           </div>
         </div>
@@ -57,7 +60,10 @@ export default function LoginForm({ onSwitch }) {
               onChange={handleChange}
               placeholder="••••••••"
               required
-              className="w-full pl-10 pr-3 py-2 border rounded-xl text-sm focus:outline-none focus:ring focus:ring-[#CCFF00]/40"
+              disabled={loading}
+              className="w-full pl-10 pr-3 py-2 border rounded-xl text-sm
+                         focus:outline-none focus:ring focus:ring-[#CCFF00]/40
+                         disabled:opacity-60"
             />
           </div>
         </div>
@@ -75,7 +81,8 @@ export default function LoginForm({ onSwitch }) {
               name="remember"
               checked={form.remember}
               onChange={handleChange}
-              className="rounded"
+              disabled={loading}
+              className="rounded border-slate-300"
             />
             Remember me
           </label>
@@ -83,6 +90,7 @@ export default function LoginForm({ onSwitch }) {
           <button
             type="button"
             className="text-[#6a7f00] hover:underline"
+            disabled={loading}
           >
             Forgot password?
           </button>
@@ -92,7 +100,8 @@ export default function LoginForm({ onSwitch }) {
         <Button
           type="submit"
           disabled={loading}
-          className="w-full bg-[#CCFF00] text-black font-semibold rounded-xl hover:bg-[#b8e600] disabled:opacity-60"
+          className="w-full bg-[#CCFF00] text-black font-semibold rounded-xl
+                     hover:bg-[#b8e600] disabled:opacity-60"
         >
           {loading ? "Signing in..." : "Sign In"}
         </Button>

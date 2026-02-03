@@ -9,6 +9,12 @@ const normalizeNode = (node) => ({
   _id: node._id,
   name: node.name,
   type: node.type,
+
+  // ✅ ALWAYS NORMALIZE STORAGE.KEY
+  storage: {
+    key: node.storage?.key ?? "",
+  },
+
   children: Array.isArray(node.children)
     ? node.children.map(normalizeNode)
     : [],
@@ -27,12 +33,14 @@ export default function useFileTree({ rootFolderId = null } = {}) {
     setError(null);
 
     try {
-      const res = await api.get("/folders/tree");
+      const res = await api.get("/folders/tree", {
+        params: rootFolderId ? { folderId: rootFolderId } : undefined,
+      });
 
       // Backend already returns a root node
       const normalizedRoot = normalizeNode(res.data.data);
 
-      // 👇 KEEP ROOT (do NOT wrap again)
+      // ✅ KEEP ROOT (do NOT wrap again)
       setFileTree([normalizedRoot]);
     } catch (err) {
       console.error("Failed to fetch file tree:", err);
@@ -41,11 +49,10 @@ export default function useFileTree({ rootFolderId = null } = {}) {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [rootFolderId]);
 
   useEffect(() => {
     fetchTree();
-    console.log(fileTree);
   }, [fetchTree]);
 
   /* ======================================================

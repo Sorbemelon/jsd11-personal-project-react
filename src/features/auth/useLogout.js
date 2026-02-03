@@ -5,7 +5,7 @@ import useAuth from "./useAuth";
 
 export default function useLogout() {
   const navigate = useNavigate();
-  const { setIsAuthenticated, setUser } = useAuth();
+  const { clearAuth } = useAuth(); // ✅ centralised reset
 
   const logout = async () => {
     try {
@@ -13,14 +13,13 @@ export default function useLogout() {
       await api.post("/auth/logout");
     } catch (err) {
       // even if this fails, we still log out locally
-      console.warn("Logout request failed:", err.message);
+      console.warn("Logout request failed:", err?.message);
     } finally {
-      // 🧹 clear local auth state
-      localStorage.removeItem("accessToken");
-      setIsAuthenticated(false);
-      setUser(null);
+      // 🧹 clear auth state via context (single source of truth)
+      clearAuth();
 
-      navigate("/");
+      // 🚪 redirect
+      navigate("/", { replace: true });
     }
   };
 

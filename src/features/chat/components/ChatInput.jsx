@@ -10,7 +10,7 @@ export default function ChatInput({ value, onChange, onSend }) {
   };
 
   return (
-    <div className="p-4 border-t flex gap-2">
+    <div className="p-4 pb-0 border-t flex gap-2">
       <input
         value={value}
         onChange={(e) => onChange(e.target.value)}
