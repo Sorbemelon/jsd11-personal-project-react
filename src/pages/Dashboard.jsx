@@ -28,6 +28,7 @@ export default function Dashboard() {
 
   const {
     selectedNodes,
+    selectedFileIdList,
     toggleSelect,
     removeSelection
   } = useSelection();
@@ -158,6 +159,7 @@ export default function Dashboard() {
           messages={messages}
           prompt={prompt}
           setPrompt={setPrompt}
+          selectedFileIdList={selectedFileIdList}
           onSend={() => {
             if (!prompt.trim()) return;
 
