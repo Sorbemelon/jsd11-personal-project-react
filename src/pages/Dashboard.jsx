@@ -6,7 +6,7 @@ import UploadCard from "@/features/upload/UploadCard";
 import ChatPanel from "@/features/chat/components/ChatPanel";
 import StoredRecordsTable from "@/features/dataViewer/StoredRecordsTable";
 import { Button } from "@/components/ui/button";
-import { PanelLeft, Sparkles, Folder } from "lucide-react";
+import { PanelLeft, PanelRight, Sparkles, Folder } from "lucide-react";
 
 import {
   useFileTree,
@@ -43,7 +43,7 @@ export default function Dashboard() {
      UI STATE
   ====================================================== */
   const [showSidebar, setShowSidebar] = useState(true);
-  const [showAI, setShowAI] = useState(true);
+  const [showUpload, setShowUpload] = useState(true);
 
   /* ======================================================
      CHAT (mock)
@@ -72,12 +72,19 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="flex min-h-[calc(100dvh-64px)] bg-slate-100">
+    <div className="flex h-[calc(100dvh-64px)] bg-slate-100 overflow-hidden">
       {/* ==================================================
-         SIDEBAR
+         SIDEBAR (animated)
       ================================================== */}
-      {showSidebar && (
-        <aside className="w-fit max-w-90 bg-white border-r p-4">
+      <aside
+        className={`
+          bg-white border-r h-full
+          transition-all duration-300 ease-in-out absolute md:static
+          ${showSidebar ? "min-w-fit w-72 max-w-90 opacity-100" : "w-0 opacity-0"}
+          overflow-hidden
+        `}
+      >
+        <div className="p-4 min-w-fit w-72 max-w-90">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2 font-medium text-indigo-600">
               <Folder size={16} /> Select & Ask AI
@@ -93,9 +100,7 @@ export default function Dashboard() {
           </div>
 
           {treeLoading ? (
-            <p className="text-sm text-slate-500">
-              Loading folders…
-            </p>
+            <p className="text-sm text-slate-500">Loading folders…</p>
           ) : (
             <FileTree
               fileTree={fileTree}
@@ -106,14 +111,14 @@ export default function Dashboard() {
               deleteNode={handleDelete}
             />
           )}
-        </aside>
-      )}
+        </div>
+      </aside>
 
       {/* ==================================================
          MAIN
       ================================================== */}
-      <main className="flex-1 p-6">
-        <div className="flex justify-between">
+      <main className="flex-1 flex flex-col p-6 min-h-0">
+        <div className="flex justify-between gap-6">
           {!showSidebar && (
             <Button
               variant="outline"
@@ -122,35 +127,38 @@ export default function Dashboard() {
               className="mb-4"
             >
               <PanelLeft size={16} className="mr-2" />
-              Show Sidebar
+              Files
             </Button>
           )}
 
-          {!showAI && (
+          {!showUpload && (
             <Button
               variant="outline"
               size="sm"
               className="mb-4 ml-auto"
-              onClick={() => setShowAI(true)}
+              onClick={() => setShowUpload(true)}
             >
-              <Sparkles size={16} className="mr-2" />
-              Show AI Assistant
+              Upload & Transform
+              <PanelRight size={14} />
             </Button>
           )}
         </div>
 
-        {/* ===== Breadcrumb ===== */}
-        {/* <BreadcrumbPath activePath={activePath} /> */}
-
-        {/* ===== Upload ===== */}
-        {showAI && (
-          <UploadCard
-            targetFolder={activeFolder ?? null}
-            onUploaded={fetchTree}
-            activePath={activePath}
-            onClose={() => setShowAI(false)}
-          />
-        )}
+        {/* ===== Upload (animated + single source refresh) ===== */}
+        <div
+          className={`
+            transition-all duration-300 ease-in-out overflow-hidden
+            ${showUpload ? "max-h-96 opacity-100" : "max-h-0 opacity-0"}
+          `}
+        >
+          <div className="transform transition-all duration-300 ease-in-out">
+            <UploadCard
+              activePath={activePath}
+              onUploaded={fetchTree}   // ⭐ single source of truth refresh
+              onClose={() => setShowUpload(false)}
+            />
+          </div>
+        </div>
 
         {/* ===== Data Viewer ===== */}
         {/* <StoredRecordsTable /> */}
@@ -169,30 +177,8 @@ export default function Dashboard() {
             ]);
             setPrompt("");
           }}
-          onClose={() => setShowAI(false)}
         />
       </main>
-
-      {/* ==================================================
-         AI PANEL
-      ================================================== */}
-      {/* {showAI && (
-        <ChatPanel
-          messages={messages}
-          prompt={prompt}
-          setPrompt={setPrompt}
-          onSend={() => {
-            if (!prompt.trim()) return;
-
-            setMessages((prev) => [
-              ...prev,
-              { role: "user", content: prompt }
-            ]);
-            setPrompt("");
-          }}
-          onClose={() => setShowAI(false)}
-        />
-      )} */}
     </div>
   );
 }

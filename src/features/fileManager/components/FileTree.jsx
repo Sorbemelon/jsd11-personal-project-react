@@ -17,6 +17,15 @@ export default function FileTree({
   const root = fileTree[0];
   if (!root) return null;
 
+  const handleCreateRootFolder = async (e) => {
+    e.preventDefault();
+    if (!name.trim()) return;
+
+    await createFolder({ name, parentId: null });
+    setName("");
+    setCreating(false);
+  };
+
   return (
     <div className="space-y-2">
       {/* ===== EMPTY STATE ===== */}
@@ -25,17 +34,7 @@ export default function FileTree({
           <p>No files yet</p>
 
           {creating ? (
-            <form
-              onSubmit={async (e) => {
-                e.preventDefault();
-                if (!name.trim()) return;
-
-                await createFolder({ name, parentId: null });
-                setName("");
-                setCreating(false);
-              }}
-              className="flex gap-2"
-            >
+            <form onSubmit={handleCreateRootFolder} className="flex gap-2">
               <input
                 autoFocus
                 value={name}

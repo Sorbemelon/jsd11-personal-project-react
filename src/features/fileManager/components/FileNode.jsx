@@ -1,17 +1,10 @@
+// src/features/fileManager/components/FileNode.jsx
 import { useState, useEffect, useMemo, useRef } from "react";
 import { Folder, FileText, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import NewFolderInput from "./NewFolderInput";
 
-/**
- * File tree node with:
- * - recursive folder rendering
- * - proper checkbox selection (supports RAG file selection)
- * - indeterminate folder state
- * - loop-safe default active path
- * - FIXED checkbox propagation bug
- */
 export default function FileNode({
   node,
   level = 0,
@@ -32,23 +25,14 @@ export default function FileNode({
   const currentPath = useMemo(() => [...parentPath, node], [parentPath, node]);
   const isRoot = level === 0;
 
-  /** Prevent infinite default-path loop */
   const didInitRef = useRef(false);
 
-  /* ======================================================
-     Selection state
-  ====================================================== */
+  /* ================= Selection ================= */
 
   const isSelected = useMemo(() => {
     return selected instanceof Set && selected.has(node._id);
   }, [selected, node._id]);
 
-  /**
-   * IMPORTANT FIX:
-   * Folder indeterminate must consider ALL descendants,
-   * not just direct children — otherwise selecting 1 deep file
-   * makes the whole tree appear selected.
-   */
   const isIndeterminate = useMemo(() => {
     if (!isFolder || !(selected instanceof Set)) return false;
 
@@ -67,9 +51,7 @@ export default function FileNode({
     return selectedCount > 0 && selectedCount < fileIds.length;
   }, [isFolder, node, selected]);
 
-  /* ======================================================
-     Default active path (root only, run once)
-  ====================================================== */
+  /* ================= Default active path ================= */
 
   useEffect(() => {
     if (didInitRef.current) return;
@@ -80,28 +62,19 @@ export default function FileNode({
     }
   }, [isRoot, activePath, node, setActivePath]);
 
-  /* ======================================================
-     Click behavior
-  ====================================================== */
+  /* ================= Click behavior ================= */
 
   const handleClick = () => {
     if (isFolder) setActivePath(currentPath);
     else setActivePath(parentPath);
   };
 
-  /**
-   * CRITICAL FIX:
-   * Stop checkbox click from bubbling to row click
-   * which was triggering unexpected selection cascades.
-   */
-  const handleCheckboxChange = (e) => {
+  const handleCheckboxChange = (value, e) => {
     e?.stopPropagation?.();
     toggleSelect(node);
   };
 
-  /* ======================================================
-     Render
-  ====================================================== */
+  /* ================= Render ================= */
 
   return (
     <li>
@@ -109,13 +82,11 @@ export default function FileNode({
         className="flex items-center gap-1 py-0.5 group"
         style={{ paddingLeft: level * 12 }}
       >
-        {/* Checkbox */}
         <Checkbox
           checked={isIndeterminate ? "indeterminate" : isSelected}
           onCheckedChange={handleCheckboxChange}
         />
 
-        {/* Expand / collapse */}
         {isFolder && (
           <button
             onClick={(e) => {
@@ -128,10 +99,8 @@ export default function FileNode({
           </button>
         )}
 
-        {/* Icon */}
         {isFolder ? <Folder size={14} /> : <FileText size={14} />}
 
-        {/* Name */}
         <span
           className="cursor-pointer text-sm flex-1 truncate"
           onClick={handleClick}
@@ -139,7 +108,6 @@ export default function FileNode({
           {node.name}
         </span>
 
-        {/* Add folder */}
         {isFolder && (
           <Button
             variant="ghost"
@@ -154,7 +122,6 @@ export default function FileNode({
           </Button>
         )}
 
-        {/* Delete */}
         {!isRoot && (
           <Button
             variant="ghost"
@@ -170,7 +137,6 @@ export default function FileNode({
         )}
       </div>
 
-      {/* New folder input */}
       {adding && (
         <NewFolderInput
           onConfirm={async (name) => {
@@ -182,7 +148,6 @@ export default function FileNode({
         />
       )}
 
-      {/* Children */}
       {isFolder && open && node.children?.length > 0 && (
         <ul>
           {node.children.map((child) => (

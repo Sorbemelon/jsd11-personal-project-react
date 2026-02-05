@@ -12,9 +12,10 @@ export default function Navbar() {
         {/* Logo */}
         <Link
           to="/"
-          className="text-xl font-bold tracking-wide text-[#CCFF00]"
+          className="flex text-3xl font-bold tracking-wide text-gray-100"
         >
-          AI File Manager
+          <div>Autumnata</div>
+          <div className="hidden lg:block">: AI Document RAG System</div>
         </Link>
 
         {/* Actions */}

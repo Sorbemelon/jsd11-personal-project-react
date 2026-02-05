@@ -20,7 +20,7 @@ export default function BreadcrumbPath({ activePath = [] }) {
   return (
     <Breadcrumb className="mb-4">
       <BreadcrumbList className={`text-black`}>
-        <p className="text-sm font-semibold pr-0">Current Folder:</p>
+        <p className="text-sm font-semibold">Current Folder:</p>
         {activePath
           .filter(Boolean) // 👈 IMPORTANT
           .map((node, idx, arr) => (

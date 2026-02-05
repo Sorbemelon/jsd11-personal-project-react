@@ -13,7 +13,7 @@ export default function LoginForm({ onSwitch }) {
 
   return (
     <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8">
-      <h2 className="text-2xl font-bold mb-2 text-black">
+      <h2 className="text-xl lg:text-2xl font-bold mb-2 text-black">
         Sign in to access your dashboard
       </h2>
 
@@ -87,13 +87,13 @@ export default function LoginForm({ onSwitch }) {
             Remember me
           </label>
 
-          <button
+          {/* <button
             type="button"
             className="text-[#6a7f00] hover:underline"
             disabled={loading}
           >
             Forgot password?
-          </button>
+          </button> */}
         </div>
 
         {/* Submit */}
