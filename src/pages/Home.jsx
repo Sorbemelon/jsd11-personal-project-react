@@ -13,7 +13,7 @@ export default function Home() {
       <section className="flex flex-col justify-center lg:w-1/2 lg:px-16 text-white">
         <div className="max-w-xl flex flex-col items-center">
           <AuroraText className="text-7xl mb-2 font-bold leading-tight text-center">
-            Autumnata
+            Autumdata
           </AuroraText>
 
           <div className="hidden lg:inline-flex items-center gap-2 px-4 py-1 mb-4 rounded-full border border-white/20 bg-gray-700 text-[#CCFF00] tracking-widest text-xs font-semibold">

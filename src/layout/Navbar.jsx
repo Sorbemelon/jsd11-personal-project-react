@@ -14,7 +14,7 @@ export default function Navbar() {
           to="/"
           className="flex text-3xl font-bold tracking-wide text-gray-100"
         >
-          <div>Autumnata</div>
+          <div>Autumdata</div>
           <div className="hidden lg:block">: AI Document RAG System</div>
         </Link>
 
