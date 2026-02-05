@@ -44,7 +44,7 @@ export default function Home() {
         {mode === "login" ? (
           <LoginForm onSwitch={() => setMode("register")} />
         ) : (
-          <CreateAccountForm onSwitch={() => setMode("login")} />
+          <CreateAccountForm onSwitch={() => setMode("login")} setMode={setMode} />
         )}
       </section>
     </div>

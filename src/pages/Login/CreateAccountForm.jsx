@@ -1,14 +1,10 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import api from "@/lib/api";
-import { Mail, Lock, User } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import useAuth from "@/features/auth/useAuth";
+import { Mail, Lock, User, CheckCircle2 } from "lucide-react";
 
-export default function CreateAccountForm({ onSwitch }) {
-  const navigate = useNavigate();
-  const { setIsAuthenticated, setUser } = useAuth();
-
+export default function CreateAccountForm({ onSwitch, setMode }) {
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -18,6 +14,7 @@ export default function CreateAccountForm({ onSwitch }) {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -37,40 +34,49 @@ export default function CreateAccountForm({ onSwitch }) {
     setLoading(true);
 
     try {
-      // 1️⃣ Register (wait until success)
       await api.post("/auth/register", {
         name: form.name,
         email: form.email,
         password: form.password,
       });
 
-      // 2️⃣ Login using SAME logic as LoginForm
-      const res = await api.post("/auth/login", {
-        email: form.email,
-        password: form.password,
-      });
-
-      const { accessToken, user } = res.data;
-
-      // 3️⃣ Persist auth (same as useLogin)
-      localStorage.setItem("accessToken", accessToken);
-      setIsAuthenticated(true);
-      setUser(user);
-
-      // 4️⃣ Redirect AFTER auth state is ready
-      navigate("/dashboard");
+      // ✅ show success notification
+      setSuccess(true);
     } catch (err) {
       if (err.response?.status === 409) {
         setError("Email already registered. Please sign in instead.");
       } else {
-        setError(
-          err.response?.data?.message || "Failed to create account"
-        );
+        setError(err.response?.data?.message || "Failed to create account");
       }
     } finally {
       setLoading(false);
     }
   };
+
+  // ✅ Success state UI
+  if (success) {
+    return (
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8">
+        <Alert className="border-green-500">
+          <CheckCircle2 className="h-5 w-5 text-green-600" />
+          <AlertTitle className="text-green-700">
+            Account created successfully
+          </AlertTitle>
+          <AlertDescription className="text-slate-600">
+            Your account is ready. You can now sign in using your email and
+            password.
+          </AlertDescription>
+        </Alert>
+
+        <Button
+          className="w-full mt-6 bg-[#CCFF00] text-black font-semibold rounded-xl hover:bg-[#b8e600]"
+          onClick={() => setMode("login")}
+        >
+          Go to Sign in
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8">
@@ -85,9 +91,7 @@ export default function CreateAccountForm({ onSwitch }) {
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Name */}
         <div>
-          <label className="text-sm font-medium text-slate-700">
-            Name
-          </label>
+          <label className="text-sm font-medium text-slate-700">Name</label>
           <div className="relative mt-1">
             <User className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
             <input
@@ -102,9 +106,7 @@ export default function CreateAccountForm({ onSwitch }) {
 
         {/* Email */}
         <div>
-          <label className="text-sm font-medium text-slate-700">
-            Email
-          </label>
+          <label className="text-sm font-medium text-slate-700">Email</label>
           <div className="relative mt-1">
             <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
             <input
@@ -120,9 +122,7 @@ export default function CreateAccountForm({ onSwitch }) {
 
         {/* Password */}
         <div>
-          <label className="text-sm font-medium text-slate-700">
-            Password
-          </label>
+          <label className="text-sm font-medium text-slate-700">Password</label>
           <div className="relative mt-1">
             <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
             <input
