@@ -1,16 +1,13 @@
-// src/features/fileManager/hooks/useFileTree.js
 import { useCallback, useEffect, useState } from "react";
 import api from "@/lib/api";
 
-/* ======================================================
-   NORMALIZER (CRITICAL)
-====================================================== */
+// NORMALIZER
 const normalizeNode = (node) => ({
   _id: node._id,
   name: node.name,
   type: node.type,
 
-  // ✅ ALWAYS NORMALIZE STORAGE.KEY
+  // ALWAYS NORMALIZE STORAGE.KEY
   storage: {
     key: node.storage?.key ?? "",
   },
@@ -25,9 +22,7 @@ export default function useFileTree({ rootFolderId = null } = {}) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  /* ======================================================
-     FETCH TREE
-  ====================================================== */
+  // FETCH TREE
   const fetchTree = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -40,7 +35,7 @@ export default function useFileTree({ rootFolderId = null } = {}) {
       // Backend already returns a root node
       const normalizedRoot = normalizeNode(res.data.data);
 
-      // ✅ KEEP ROOT (do NOT wrap again)
+      // KEEP ROOT (do NOT wrap again)
       setFileTree([normalizedRoot]);
     } catch (err) {
       console.error("Failed to fetch file tree:", err);
@@ -55,10 +50,7 @@ export default function useFileTree({ rootFolderId = null } = {}) {
     fetchTree();
   }, [fetchTree]);
 
-  /* ======================================================
-     MUTATIONS
-  ====================================================== */
-
+  // CUD
   const createFolder = async ({ name, parentId = null }) => {
     if (!name?.trim()) return;
 

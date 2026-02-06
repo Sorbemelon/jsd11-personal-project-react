@@ -1,20 +1,14 @@
-// src/features/upload/UploadCard.jsx
 import { Upload, PanelRight } from "lucide-react";
 import { useRef } from "react";
 import { useUpload } from "./useUpload";
 import BreadcrumbPath from "@/features/fileManager/components/BreadcrumbPath";
 import { Button } from "@/components/ui/button";
 
-/**
- * UploadCard
- * - Uploads file to current active folder
- * - Calls onUploaded AFTER successful upload
- *   so parent can refresh the file tree
- */
+// UploadCard
 export default function UploadCard({ activePath = [], onClose, onUploaded }) {
   const inputRef = useRef(null);
 
-  // 🎯 current folder
+  // current folder
   const currentFolder = activePath.at(-1) ?? null;
   const parentId = currentFolder?._id ?? null;
 
@@ -27,7 +21,7 @@ export default function UploadCard({ activePath = [], onClose, onUploaded }) {
     try {
       await uploadFile(file);
 
-      // ✅ notify parent to refetch tree
+      // notify parent to refetch tree
       await onUploaded?.();
     } finally {
       e.target.value = "";
@@ -37,7 +31,7 @@ export default function UploadCard({ activePath = [], onClose, onUploaded }) {
   return (
     <div className="bg-white rounded-2xl shadow p-6 pt-2 mb-6 w-full">
       <div className="flex justify-between items-center">
-        <h2 className="text-lg font-semibold flex items-center gap-2">
+        <h2 className="text-lg font-semibold flex items-center gap-1">
           <Upload size={18} /> Upload & Transform
         </h2>
 
@@ -50,7 +44,7 @@ export default function UploadCard({ activePath = [], onClose, onUploaded }) {
 
       <div
         onClick={() => inputRef.current?.click()}
-        className={`border-2 border-dashed rounded-xl p-4 text-center cursor-pointer transition flex items-center justify-center
+        className={`border-2 border-dashed rounded-xl p-4 text-center cursor-pointer transition flex items-center gap-1 justify-center
           ${
             uploading
               ? "opacity-50 pointer-events-none"
@@ -62,7 +56,7 @@ export default function UploadCard({ activePath = [], onClose, onUploaded }) {
         <p className="text-sm text-slate-600">
           {uploading
             ? "Uploading..."
-            : "Click here to upload file to the current folder"}
+            : "Click here to upload file to the current folder (max size 10 MB)"}
         </p>
       </div>
 

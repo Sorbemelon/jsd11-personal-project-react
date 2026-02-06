@@ -4,12 +4,10 @@ const api = axios.create({
   baseURL:
     import.meta.env.VITE_API_BASE_URL ||
     "http://localhost:3000/api/v1",
-  withCredentials: true, // 🔑 cookie-based auth
+  withCredentials: true, // cookie-based auth
 });
 
-/* ======================================================
-   RESPONSE: Auto refresh on 401 (SAFE & LOOP-PROOF)
-====================================================== */
+/* RESPONSE: Auto refresh on 401 (SAFE & LOOP-PROOF) */
 let isRefreshing = false;
 let refreshQueue = [];
 
@@ -34,7 +32,7 @@ api.interceptors.response.use(
       "/auth/register",
       "/auth/logout",
       "/auth/refresh",
-      "/auth/me", // 🚫 auth bootstrap must NOT refresh
+      "/auth/me",
     ];
 
     const shouldSkipRefresh =
@@ -49,7 +47,7 @@ api.interceptors.response.use(
 
     originalRequest._retry = true;
 
-    // 🔒 Queue while refresh is running
+    // Queue while refresh is running
     if (isRefreshing) {
       return new Promise((resolve, reject) => {
         refreshQueue.push({ resolve, reject });
@@ -64,10 +62,10 @@ api.interceptors.response.use(
       processQueue(null);
       return api(originalRequest);
     } catch (refreshErr) {
-      // ❌ Refresh failed = unauthenticated
+      // Refresh failed = unauthenticated
       processQueue(refreshErr);
 
-      // 🚫 DO NOT redirect / reload here
+      // DO NOT redirect / reload here
       return Promise.reject(refreshErr);
     } finally {
       isRefreshing = false;

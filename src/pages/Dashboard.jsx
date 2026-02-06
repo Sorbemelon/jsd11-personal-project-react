@@ -1,7 +1,5 @@
-// src/pages/Dashboard.jsx
 import { useState } from "react";
 import FileTree from "@/features/fileManager/components/FileTree";
-import BreadcrumbPath from "@/features/fileManager/components/BreadcrumbPath";
 import UploadCard from "@/features/upload/UploadCard";
 import ChatPanel from "@/features/chat/components/ChatPanel";
 import StoredRecordsTable from "@/features/dataViewer/StoredRecordsTable";
@@ -15,9 +13,7 @@ import {
 } from "@/features/fileManager";
 
 export default function Dashboard() {
-  /* ======================================================
-     FILE TREE (API)
-  ====================================================== */
+  /* FILE TREE (API) */
   const {
     fileTree,
     loading: treeLoading,
@@ -36,26 +32,19 @@ export default function Dashboard() {
   const {
     activePath = [],
     setActivePath,
-    activeFolder
   } = useBreadcrumb();
 
-  /* ======================================================
-     UI STATE
-  ====================================================== */
+  /* UI STATE */
   const [showSidebar, setShowSidebar] = useState(true);
   const [showUpload, setShowUpload] = useState(true);
 
-  /* ======================================================
-     CHAT (mock)
-  ====================================================== */
+  /* CHAT */
   const [prompt, setPrompt] = useState("");
   const [messages, setMessages] = useState([
-    { role: "ai", content: "Ask me anything about your selected documents." }
+    { role: "ai", content: "Ask me about your selected documents." }
   ]);
 
-  /* ======================================================
-     HANDLERS
-  ====================================================== */
+  /* HANDLERS */
   const handleDelete = async (node) => {
     if (!node) return;
 
@@ -73,21 +62,19 @@ export default function Dashboard() {
 
   return (
     <div className="flex h-[calc(100dvh-64px)] bg-slate-100 overflow-hidden">
-      {/* ==================================================
-         SIDEBAR (animated)
-      ================================================== */}
+      {/* SIDEBAR */}
       <aside
         className={`
           bg-white border-r h-full
           transition-all duration-300 ease-in-out absolute md:static
           ${showSidebar ? "min-w-fit w-72 max-w-90 opacity-100" : "w-0 opacity-0"}
-          overflow-hidden
+          overflow-auto
         `}
       >
         <div className="p-4 min-w-fit w-72 max-w-90">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2 font-medium text-indigo-600">
-              <Folder size={16} /> Select & Ask AI
+              <Folder size={16} /> Sources for AI
             </div>
 
             <Button
@@ -114,9 +101,7 @@ export default function Dashboard() {
         </div>
       </aside>
 
-      {/* ==================================================
-         MAIN
-      ================================================== */}
+      {/* MAIN */}
       <main className="flex-1 flex flex-col p-6 min-h-0">
         <div className="flex justify-between gap-6">
           {!showSidebar && (
@@ -144,7 +129,7 @@ export default function Dashboard() {
           )}
         </div>
 
-        {/* ===== Upload (animated + single source refresh) ===== */}
+        {/* Upload */}
         <div
           className={`
             transition-all duration-300 ease-in-out overflow-hidden
@@ -154,7 +139,7 @@ export default function Dashboard() {
           <div className="transform transition-all duration-300 ease-in-out">
             <UploadCard
               activePath={activePath}
-              onUploaded={fetchTree}   // ⭐ single source of truth refresh
+              onUploaded={fetchTree}
               onClose={() => setShowUpload(false)}
             />
           </div>

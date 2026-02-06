@@ -5,7 +5,6 @@ export default function RequireAuth({ children }) {
   const { isAuthenticated, loading } = useAuth();
   const location = useLocation();
 
-  // ⏳ Still resolving auth state (/auth/me)
   if (loading) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center text-slate-500">
@@ -14,7 +13,6 @@ export default function RequireAuth({ children }) {
     );
   }
 
-  // 🔒 Auth resolved → not logged in
   if (!isAuthenticated) {
     return (
       <Navigate
@@ -25,6 +23,5 @@ export default function RequireAuth({ children }) {
     );
   }
 
-  // ✅ Authenticated
   return children;
 }

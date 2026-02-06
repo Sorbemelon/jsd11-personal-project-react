@@ -1,4 +1,3 @@
-// src/features/fileManager/components/FileNode.jsx
 import { useState, useEffect, useMemo, useRef } from "react";
 import { Folder, FileText, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -79,30 +78,34 @@ export default function FileNode({
   return (
     <li>
       <div
-        className="flex items-center gap-1 py-0.5 group"
-        style={{ paddingLeft: level * 12 }}
+        className="flex items-start gap-1 py-1 group"
+        style={{ paddingLeft: level * 14 }}
       >
-        <Checkbox
-          checked={isIndeterminate ? "indeterminate" : isSelected}
-          onCheckedChange={handleCheckboxChange}
-        />
+        <div className="flex items-center gap-1 pt-[3px]">
+          <Checkbox
+            checked={isIndeterminate ? "indeterminate" : isSelected}
+            onCheckedChange={handleCheckboxChange}
+          />
 
-        {isFolder && (
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              setOpen((o) => !o);
-            }}
-            className="h-4 w-4 text-base mb-2"
-          >
-            {open ? "▾" : "▸"}
-          </button>
-        )}
+          {isFolder ? (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setOpen((o) => !o);
+              }}
+              className="h-4 w-4 text-base leading-none"
+            >
+              {open ? "▾" : "▸"}
+            </button>
+          ) : (
+            <div className="ml-1"></div>
+          )}
 
-        {isFolder ? <Folder size={14} /> : <FileText size={14} />}
+          {isFolder ? <Folder size={14} /> : <FileText size={14} />}
+        </div>
 
         <span
-          className="cursor-pointer text-sm flex-1 truncate"
+          className="cursor-pointer text-sm flex-1 truncate text-wrap"
           onClick={handleClick}
         >
           {node.name}

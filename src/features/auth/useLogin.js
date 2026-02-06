@@ -5,7 +5,7 @@ import useAuth from "./useAuth";
 
 export default function useLogin() {
   const navigate = useNavigate();
-  const { refreshAuth } = useAuth(); // ✅ use single source of truth
+  const { refreshAuth } = useAuth();
 
   const [form, setForm] = useState({
     email: "",
@@ -33,17 +33,17 @@ export default function useLogin() {
     setError(null);
 
     try {
-      // 1️⃣ Login → sets cookies
+      // Login → sets cookies
       await api.post("/auth/login", {
         email: form.email,
         password: form.password,
         remember: form.remember,
       });
 
-      // 2️⃣ Rehydrate auth context
+      // Rehydrate auth context
       await refreshAuth();
 
-      // 3️⃣ Redirect
+      // Redirect
       navigate("/dashboard", { replace: true });
     } catch (err) {
       if (err.response?.status === 429) {

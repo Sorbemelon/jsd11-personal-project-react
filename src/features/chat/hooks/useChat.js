@@ -21,11 +21,11 @@ export default function useChat(selectedFileIdList = []) {
     sendingRef.current = true;
     setLoading(true);
 
-    // 1️⃣ push user message immediately
+    // push user message immediately
     setMessages((prev) => [...prev, { role: "user", content: question }]);
     setInput("");
 
-    // 2️⃣ show temporary thinking message
+    // show temporary thinking message
     const thinkingId = Date.now();
     setMessages((prev) => [
       ...prev,
@@ -33,7 +33,7 @@ export default function useChat(selectedFileIdList = []) {
     ]);
 
     try {
-      // 3️⃣ call backend RAG chat endpoint
+      // call backend RAG chat endpoint
       const { data } = await api.post("/chat", {
         message: question,
         fileIds: selectedFileIdList,
@@ -42,7 +42,7 @@ export default function useChat(selectedFileIdList = []) {
       const answer = data?.data?.answer || "No response from AI.";
       const sources = data?.data?.sources || [];
 
-      // 4️⃣ replace thinking message with real answer
+      // replace thinking message with real answer
       setMessages((prev) =>
         prev.map((m) =>
           m.id === thinkingId

@@ -40,7 +40,7 @@ export default function CreateAccountForm({ onSwitch, setMode }) {
         password: form.password,
       });
 
-      // ✅ show success notification
+      // Show success notification
       setSuccess(true);
     } catch (err) {
       if (err.response?.status === 409) {
@@ -53,7 +53,7 @@ export default function CreateAccountForm({ onSwitch, setMode }) {
     }
   };
 
-  // ✅ Success state UI
+  // Success state UI
   if (success) {
     return (
       <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8">

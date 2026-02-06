@@ -2,22 +2,20 @@ import { useState, useMemo } from "react";
 import { collectIds } from "../utils/treeHelpers";
 
 export default function useSelection() {
-  /** All selected node IDs (folders + files) */
+  /* All selected node IDs (folders + files) */
   const [selectedNodes, setSelectedNodes] = useState(new Set());
 
-  /** Only selected FILE ids → used for RAG */
+  /* Only selected FILE ids → used for RAG */
   const [selectedFileIds, setSelectedFileIds] = useState(new Set());
 
-  /* ================================
-     Toggle select
-  ================================= */
+  /* Toggle select */
   const toggleSelect = (node) => {
     const nextNodes = new Set(selectedNodes);
     const nextFiles = new Set(selectedFileIds);
 
     const isFolder = node.type === "folder";
 
-    // ⭐ files → only toggle itself
+    // files → only toggle itself
     const targets = isFolder ? collectIds(node) : [node];
 
     const shouldSelect = !nextNodes.has(node._id);
@@ -45,9 +43,7 @@ export default function useSelection() {
 
   };
 
-  /* ================================
-     Remove selection subtree
-  ================================= */
+  /* Remove selection subtree */
   const removeSelection = (node) => {
     const nextNodes = new Set(selectedNodes);
     const nextFiles = new Set(selectedFileIds);
@@ -64,9 +60,7 @@ export default function useSelection() {
     setSelectedFileIds(nextFiles);
   };
 
-  /* ================================
-     Array form → easier for API
-  ================================= */
+  /* Array form → easier for API */
   const selectedFileIdList = useMemo(
     () => Array.from(selectedFileIds),
     [selectedFileIds]

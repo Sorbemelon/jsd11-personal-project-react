@@ -1,4 +1,3 @@
-// src/features/fileManager/components/FileTree.jsx
 import { useState } from "react";
 import { FolderPlus } from "lucide-react";
 import FileNode from "./FileNode";
@@ -62,7 +61,7 @@ export default function FileTree({
       )}
 
       {/* ===== RENDER ROOT CHILDREN ONLY ===== */}
-      <ul className="space-y-1">
+      <ul className="space-y-1 max-w-80">
         {root.children.map((child) => (
           <FileNode
             key={child._id}

@@ -19,11 +19,11 @@ const router = createBrowserRouter([
       </div>
     ),
     children: [
-      // 🌍 Public routes
-      { index: true, element: <Home /> },        // "/"
-      { path: "home", element: <Home /> },       // "/home"
+      // Public routes
+      { index: true, element: <Home /> },
+      { path: "home", element: <Home /> },
 
-      // 🔐 Protected routes
+      // Protected routes
       {
         path: "dashboard",
         element: (

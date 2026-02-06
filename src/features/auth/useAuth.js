@@ -1,4 +1,3 @@
-// src/features/auth/useAuth.js
 import { useAuthContext } from "./AuthContext";
 
 export default function useAuth() {

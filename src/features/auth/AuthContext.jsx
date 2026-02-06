@@ -45,7 +45,7 @@ export function AuthProvider({ children }) {
         isAuthenticated,
         user,
         loading,
-        refreshAuth, // ✅ EXPOSE THIS
+        refreshAuth,
         clearAuth,
       }}
     >
