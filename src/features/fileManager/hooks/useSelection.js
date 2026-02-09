@@ -38,8 +38,8 @@ export default function useSelection() {
 
     setSelectedNodes(nextNodes);
     setSelectedFileIds(nextFiles);
-    console.log("TOGGLE NODE:", node.name, node.type);
-    console.log("COLLECTED:", collectIds(node));
+    // console.log("TOGGLE NODE:", node.name, node.type);
+    // console.log("COLLECTED:", collectIds(node));
 
   };
 

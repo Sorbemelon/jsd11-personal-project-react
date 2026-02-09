@@ -3,12 +3,11 @@ import { useRef } from "react";
 import { useUpload } from "./useUpload";
 import BreadcrumbPath from "@/features/fileManager/components/BreadcrumbPath";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
-// UploadCard
 export default function UploadCard({ activePath = [], onClose, onUploaded }) {
   const inputRef = useRef(null);
 
-  // current folder
   const currentFolder = activePath.at(-1) ?? null;
   const parentId = currentFolder?._id ?? null;
 
@@ -20,9 +19,19 @@ export default function UploadCard({ activePath = [], onClose, onUploaded }) {
 
     try {
       await uploadFile(file);
-
-      // notify parent to refetch tree
       await onUploaded?.();
+
+      // Sonner success toast
+      toast.success("Upload complete", {
+        description: `${file.name} was uploaded and processed successfully.`,
+      });
+    } catch (err) {
+      // Sonner error toast
+      toast.error("Upload failed", {
+        description:
+          err?.response?.data?.message ||
+          "Something went wrong while uploading the file.",
+      });
     } finally {
       e.target.value = "";
     }
@@ -45,17 +54,13 @@ export default function UploadCard({ activePath = [], onClose, onUploaded }) {
       <div
         onClick={() => inputRef.current?.click()}
         className={`border-2 border-dashed rounded-xl p-4 text-center cursor-pointer transition flex items-center gap-1 justify-center
-          ${
-            uploading
-              ? "opacity-50 pointer-events-none"
-              : "hover:border-indigo-400"
-          }
+          ${uploading ? "opacity-50 pointer-events-none" : "hover:border-indigo-400"}
         `}
       >
         <Upload className="text-slate-400" />
         <p className="text-sm text-slate-600">
           {uploading
-            ? "Uploading..."
+            ? "Uploading & Processing..."
             : "Click here to upload file to the current folder (max size 10 MB)"}
         </p>
       </div>

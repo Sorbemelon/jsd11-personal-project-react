@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import api from "../../lib/api";
+import api, { setHasLoggedIn } from "../../lib/api";
 import useAuth from "./useAuth";
 
 export default function useLogin() {
@@ -33,17 +33,20 @@ export default function useLogin() {
     setError(null);
 
     try {
-      // Login → sets cookies
+      /* Login → cookies created */
       await api.post("/auth/login", {
         email: form.email,
         password: form.password,
         remember: form.remember,
       });
 
-      // Rehydrate auth context
+      // mark session as authenticated (prevents bad refresh logic)
+      setHasLoggedIn(true);
+
+      /* Rehydrate auth context */
       await refreshAuth();
 
-      // Redirect
+      /* Redirect */
       navigate("/dashboard", { replace: true });
     } catch (err) {
       if (err.response?.status === 429) {

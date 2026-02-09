@@ -1,11 +1,9 @@
 import { createBrowserRouter } from "react-router-dom";
-
 import Layout from "@/layout/Layout";
 import Home from "@/pages/Home";
 import Dashboard from "@/pages/Dashboard";
-import LoginPage from "@/pages/Login/LoginForm";
-
 import RequireAuth from "@/features/auth/RequireAuth";
+import RedirectIfAuth from "@/features/auth/RedirectIfAuth";
 
 const router = createBrowserRouter([
   {
@@ -20,8 +18,22 @@ const router = createBrowserRouter([
     ),
     children: [
       // Public routes
-      { index: true, element: <Home /> },
-      { path: "home", element: <Home /> },
+      {
+        index: true,
+        element: (
+          <RedirectIfAuth>
+            <Home />
+          </RedirectIfAuth>
+        ),
+      },
+      {
+        path: "home",
+        element: (
+          <RedirectIfAuth>
+            <Home />
+          </RedirectIfAuth>
+        ),
+      },
 
       // Protected routes
       {

@@ -10,23 +10,24 @@ export function AuthProvider({ children }) {
 
   const initializedRef = useRef(false);
 
-  const refreshAuth = async () => {
-    setLoading(true);
+const refreshAuth = async () => {
+  setLoading(true);
 
-    try {
-      const res = await api.get("/auth/me");
-      const user = res.data?.user ?? null;
+  try {
+    const res = await api.get("/auth/me");
+    const user = res.data?.user ?? null;
 
-      setUser(user);
-      setIsAuthenticated(Boolean(user));
-    } catch {
-      setUser(null);
-      setIsAuthenticated(false);
-    } finally {
-      setLoading(false);
-    }
-  };
+    setUser(user);
+    setIsAuthenticated(Boolean(user));
+  } catch (err) {
+    setUser(null);
+    setIsAuthenticated(false);
+  } finally {
+    setLoading(false);
+  }
+};
 
+  /* Run once on app start */
   useEffect(() => {
     if (initializedRef.current) return;
     initializedRef.current = true;
@@ -34,7 +35,8 @@ export function AuthProvider({ children }) {
     refreshAuth();
   }, []);
 
-  const clearAuth = async () => {
+  /* Clear auth locally (used on logout) */
+  const clearAuth = () => {
     setUser(null);
     setIsAuthenticated(false);
   };

@@ -3,40 +3,40 @@ import {
   BreadcrumbItem,
   BreadcrumbLink,
   BreadcrumbList,
-  BreadcrumbSeparator
+  BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { ChevronRight } from "lucide-react";
-import { useEffect } from "react";
 
 export default function BreadcrumbPath({ activePath = [] }) {
   if (!Array.isArray(activePath) || activePath.length === 0) {
     return null;
   }
-  
-  // useEffect(() => {
-  //   console.log(activePath);
-  // }, []);
 
   return (
-    <Breadcrumb className="mb-4">
-      <BreadcrumbList className={`text-black`}>
-        <p className="text-sm font-semibold px-2">Current Folder:</p>
-        {activePath
-          .filter(Boolean)
-          .map((node, idx, arr) => (
-            <BreadcrumbItem key={node._id}>
-              <BreadcrumbLink href="#">
-                {node.name ?? "Unnamed"}
-              </BreadcrumbLink>
+    <div className="flex mb-4">
+      <p className="text-sm font-semibold px-2 mb-1">Current Folder:</p>
 
-              {idx < arr.length - 1 && (
-                <BreadcrumbSeparator>
-                  <ChevronRight size={14} />
-                </BreadcrumbSeparator>
-              )}
-            </BreadcrumbItem>
-          ))}
-      </BreadcrumbList>
-    </Breadcrumb>
+      <Breadcrumb>
+        <BreadcrumbList className="text-black">
+          {activePath
+            .filter(Boolean)
+            .map((node, idx) => (
+              <span key={node._id} className="flex items-center">
+                <BreadcrumbItem>
+                  <BreadcrumbLink href="#">
+                    {node.name ?? "Unnamed"}
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+
+                {idx < activePath.length - 1 && (
+                  <BreadcrumbSeparator>
+                    <ChevronRight size={14} />
+                  </BreadcrumbSeparator>
+                )}
+              </span>
+            ))}
+        </BreadcrumbList>
+      </Breadcrumb>
+    </div>
   );
 }

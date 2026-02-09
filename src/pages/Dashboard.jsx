@@ -4,12 +4,12 @@ import UploadCard from "@/features/upload/UploadCard";
 import ChatPanel from "@/features/chat/components/ChatPanel";
 import StoredRecordsTable from "@/features/dataViewer/StoredRecordsTable";
 import { Button } from "@/components/ui/button";
-import { PanelLeft, PanelRight, Sparkles, Folder } from "lucide-react";
+import { PanelLeft, PanelRight, Folder } from "lucide-react";
 
 import {
   useFileTree,
   useSelection,
-  useBreadcrumb
+  useBreadcrumb,
 } from "@/features/fileManager";
 
 export default function Dashboard() {
@@ -19,20 +19,13 @@ export default function Dashboard() {
     loading: treeLoading,
     createFolder,
     deleteNode,
-    fetchTree
+    fetchTree,
   } = useFileTree();
 
-  const {
-    selectedNodes,
-    selectedFileIdList,
-    toggleSelect,
-    removeSelection
-  } = useSelection();
+  const { selectedNodes, selectedFileIdList, toggleSelect, removeSelection } =
+    useSelection();
 
-  const {
-    activePath = [],
-    setActivePath,
-  } = useBreadcrumb();
+  const { activePath = [], setActivePath } = useBreadcrumb();
 
   /* UI STATE */
   const [showSidebar, setShowSidebar] = useState(true);
@@ -41,7 +34,11 @@ export default function Dashboard() {
   /* CHAT */
   const [prompt, setPrompt] = useState("");
   const [messages, setMessages] = useState([
-    { role: "ai", content: "Ask me about your selected documents." }
+    {
+      id: crypto.randomUUID(),
+      role: "ai",
+      content: "Ask me about your selected documents.",
+    },
   ]);
 
   /* HANDLERS */
@@ -60,14 +57,33 @@ export default function Dashboard() {
     removeSelection(node);
   };
 
+  const handleSendMessage = () => {
+    if (!prompt.trim()) return;
+
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: crypto.randomUUID(),
+        role: "user",
+        content: prompt,
+      },
+    ]);
+
+    setPrompt("");
+  };
+
   return (
-    <div className="flex h-[calc(100dvh-64px)] bg-slate-100 overflow-hidden">
+    <div className="flex h-full bg-slate-100 overflow-hidden">
       {/* SIDEBAR */}
       <aside
         className={`
-          bg-white border-r h-full
+          bg-white border-r
           transition-all duration-300 ease-in-out absolute md:static
-          ${showSidebar ? "min-w-fit w-72 max-w-90 opacity-100" : "w-0 opacity-0"}
+          ${
+            showSidebar
+              ? "min-w-fit w-72 max-w-90 opacity-100"
+              : "w-0 opacity-0"
+          }
           overflow-auto
         `}
       >
@@ -102,7 +118,7 @@ export default function Dashboard() {
       </aside>
 
       {/* MAIN */}
-      <main className="flex-1 flex flex-col p-6 min-h-0">
+      <main className="flex-1 flex flex-col p-6 min-h-0 h-">
         <div className="flex justify-between gap-6">
           {!showSidebar && (
             <Button
@@ -153,15 +169,7 @@ export default function Dashboard() {
           prompt={prompt}
           setPrompt={setPrompt}
           selectedFileIdList={selectedFileIdList}
-          onSend={() => {
-            if (!prompt.trim()) return;
-
-            setMessages((prev) => [
-              ...prev,
-              { role: "user", content: prompt }
-            ]);
-            setPrompt("");
-          }}
+          onSend={handleSendMessage}
         />
       </main>
     </div>

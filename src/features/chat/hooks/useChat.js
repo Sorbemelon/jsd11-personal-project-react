@@ -1,17 +1,20 @@
 import { useState, useRef } from "react";
 import api from "@/lib/api";
 
+const createMessage = (role, content, extra = {}) => ({
+  id: crypto.randomUUID(),
+  role,
+  content,
+  ...extra,
+});
+
 export default function useChat(selectedFileIdList = []) {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState([
-    {
-      role: "ai",
-      content: "Ask me anything about your selected documents.",
-    },
+    createMessage("ai", "Ask me anything about your selected documents."),
   ]);
   const [loading, setLoading] = useState(false);
 
-  // prevent race conditions if user sends quickly
   const sendingRef = useRef(false);
 
   const sendMessage = async () => {
@@ -21,19 +24,19 @@ export default function useChat(selectedFileIdList = []) {
     sendingRef.current = true;
     setLoading(true);
 
-    // push user message immediately
-    setMessages((prev) => [...prev, { role: "user", content: question }]);
+    // push user message with ID
+    const userMsg = createMessage("user", question);
+    setMessages((prev) => [...prev, userMsg]);
     setInput("");
 
-    // show temporary thinking message
-    const thinkingId = Date.now();
+    // temporary thinking message
+    const thinkingId = crypto.randomUUID();
     setMessages((prev) => [
       ...prev,
       { id: thinkingId, role: "ai", content: "Thinking..." },
     ]);
 
     try {
-      // call backend RAG chat endpoint
       const { data } = await api.post("/chat", {
         message: question,
         fileIds: selectedFileIdList,
@@ -42,23 +45,22 @@ export default function useChat(selectedFileIdList = []) {
       const answer = data?.data?.answer || "No response from AI.";
       const sources = data?.data?.sources || [];
 
-      // replace thinking message with real answer
+      // replace thinking message
       setMessages((prev) =>
         prev.map((m) =>
           m.id === thinkingId
-            ? { role: "ai", content: answer, sources }
+            ? createMessage("ai", answer, { sources })
             : m
         )
       );
-    } catch (err) {
-      // replace thinking with error message
+    } catch {
       setMessages((prev) =>
         prev.map((m) =>
           m.id === thinkingId
-            ? {
-                role: "ai",
-                content: "⚠️ Failed to get AI response. Please try again.",
-              }
+            ? createMessage(
+                "ai",
+                "⚠️ Failed to get AI response. Please try again."
+              )
             : m
         )
       );
