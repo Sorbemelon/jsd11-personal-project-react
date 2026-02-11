@@ -1,14 +1,16 @@
-import { Sparkles } from "lucide-react";
-import { useState } from "react";
-import LoginForm from "./Login/LoginForm";
-import CreateAccountForm from "./Login/CreateAccountForm";
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
+import { useState, lazy, Suspense } from "react";
 import { AuroraText } from "@/components/ui/aurora-text";
+
+// Lazy load heavy auth components
+const LoginForm = lazy(() => import("./Login/LoginForm"));
+const CreateAccountForm = lazy(() => import("./Login/CreateAccountForm"));
 
 export default function Home() {
   const [mode, setMode] = useState("login"); // "login" | "register"
 
   return (
-    <div className="h-full bg-linear-to-br from-gray-800 to-black flex flex-col lg:flex-row lg:justify-around px-6">
+    <div className="min-h-full bg-linear-to-br from-gray-800 to-black flex flex-col lg:flex-row lg:justify-around items-center px-6">
       {/* LEFT: HERO */}
       <section className="flex flex-col justify-center text-white">
         <div className="max-w-xl flex flex-col items-center text-center">
@@ -21,7 +23,7 @@ export default function Home() {
             AI-POWERED KNOWLEDGE
           </div>
 
-          <p className="text-lg text-white/90 lg:mb-6">
+          <p className="lg:text-lg text-white/90 lg:mb-6">
             Turn your documents into a searchable AI knowledge hub.
             Upload files, extract insights automatically, and chat with your data
             to get precise answers in seconds.
@@ -37,11 +39,22 @@ export default function Home() {
 
       {/* RIGHT: AUTH CARD */}
       <section className="flex items-center mt-6 lg:mt-0">
-        {mode === "login" ? (
-          <LoginForm onSwitch={() => setMode("register")} />
-        ) : (
-          <CreateAccountForm onSwitch={() => setMode("login")} setMode={setMode} />
-        )}
+        <Suspense
+          fallback={
+            <div className="text-white/70 text-sm animate-pulse">
+              Loading authentication…
+            </div>
+          }
+        >
+          {mode === "login" ? (
+            <LoginForm onSwitch={() => setMode("register")} />
+          ) : (
+            <CreateAccountForm
+              onSwitch={() => setMode("login")}
+              setMode={setMode}
+            />
+          )}
+        </Suspense>
       </section>
     </div>
   );

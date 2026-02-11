@@ -1,9 +1,13 @@
 import { createBrowserRouter } from "react-router-dom";
+import { lazy, Suspense } from "react";
+
 import Layout from "@/layout/Layout";
 import Home from "@/pages/Home";
-import Dashboard from "@/pages/Dashboard";
 import RequireAuth from "@/features/auth/RequireAuth";
 import RedirectIfAuth from "@/features/auth/RedirectIfAuth";
+
+// Lazy load heavy pages
+const Dashboard = lazy(() => import("@/pages/Dashboard"));
 
 const router = createBrowserRouter([
   {
@@ -40,7 +44,15 @@ const router = createBrowserRouter([
         path: "dashboard",
         element: (
           <RequireAuth>
-            <Dashboard />
+            <Suspense
+              fallback={
+                <div className="flex h-full items-center justify-center">
+                  <p className="text-slate-500">Loading dashboard…</p>
+                </div>
+              }
+            >
+              <Dashboard />
+            </Suspense>
           </RequireAuth>
         ),
       },

@@ -6,36 +6,46 @@ const AuthContext = createContext(null);
 export function AuthProvider({ children }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+
+  // Start as false so Home renders instantly
+  const [loading, setLoading] = useState(false);
 
   const initializedRef = useRef(false);
+  const refreshingRef = useRef(false);
 
-const refreshAuth = async () => {
-  setLoading(true);
+  /* Refresh auth state from backend
+     - silent failure (no UI blocking)
+     - prevents parallel calls */
+  const refreshAuth = async () => {
+    if (refreshingRef.current) return;
+    refreshingRef.current = true;
 
-  try {
-    const res = await api.get("/auth/me");
-    const user = res.data?.user ?? null;
+    try {
+      const res = await api.get("/auth/me");
+      const userData = res.data?.user ?? null;
 
-    setUser(user);
-    setIsAuthenticated(Boolean(user));
-  } catch (err) {
-    setUser(null);
-    setIsAuthenticated(false);
-  } finally {
-    setLoading(false);
-  }
-};
+      setUser(userData);
+      setIsAuthenticated(Boolean(userData));
+    } catch {
+      setUser(null);
+      setIsAuthenticated(false);
+    } finally {
+      refreshingRef.current = false;
+      setLoading(false);
+    }
+  };
 
-  /* Run once on app start */
+  /* Run once on app start
+     - DO NOT block initial render */
   useEffect(() => {
     if (initializedRef.current) return;
     initializedRef.current = true;
 
-    refreshAuth();
+    // run in background (next tick)
+    setTimeout(refreshAuth, 0);
   }, []);
 
-  /* Clear auth locally (used on logout) */
+  // Clear auth locally (logout)
   const clearAuth = () => {
     setUser(null);
     setIsAuthenticated(false);
