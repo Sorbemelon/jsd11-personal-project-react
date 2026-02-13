@@ -1,2 +1,1 @@
-1. Create Vite React JavaScript Project
-2. Install and configure Tailwind
+AI Document RAG System: An AI-powered document platform built with MERN, Amazon S3, and Gemini AI that turns uploaded files into a searchable knowledge base with semantic retrieval and context-aware Q&A.
